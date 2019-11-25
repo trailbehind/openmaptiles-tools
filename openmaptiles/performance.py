@@ -50,7 +50,7 @@ class PerfTester:
                  save_to: Union[None, str, Path], compare_with: Union[None, str, Path],
                  key_column: bool, gzip: bool, disable_feature_ids: bool = None,
                  disable_tile_envelope: bool = None, exclude_layers: bool = False,
-                 verbose: bool = None):
+                 verbose: bool = None, bbox: str = None):
         self.tileset = Tileset.parse(tileset)
         self.dbname = dbname
         self.pghost = pghost
@@ -85,6 +85,15 @@ class PerfTester:
         if test_all:
             # Do this after validating individual tests, they are ignored but validated
             tests = [v for v in TEST_CASES.keys() if v != 'null']
+        if bbox:
+            split_bbox = [int(f) for f in bbox.split(",")]
+            test = TestCase(
+                'bbox',
+                bbox,
+                (split_bbox[0], split_bbox[1]), (split_bbox[2], split_bbox[3])
+            )
+            tests = {'bbox': test}
+            TEST_CASES['bbox'] = test
         all_layers = [l["layer"]['id'] for l in self.tileset.layers]
         if layers and exclude_layers:
             # inverse layers list
